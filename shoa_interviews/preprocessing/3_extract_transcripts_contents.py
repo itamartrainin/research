@@ -119,3 +119,39 @@ transcripts[config.SECTION_ID] = transcripts[config.SECTION_ID].progress_apply(i
 transcripts = transcripts.sort_values(by=[config.INTERVIEW_ID, config.TAPE_ID, config.TIME])
 
 transcripts.to_pickle(save_dir + os.sep + 'contents.pkl')
+
+#%%
+transcripts = pd.read_pickle(save_dir + os.sep + 'contents.pkl')
+# full_interviews = transcripts.groupby('interview_id')['content'].apply(lambda x: ' '.join(x))
+transcripts['prev_info'] = transcripts[['interview_id', 'section_id', 'content_id']].shift(-1).progress_apply(lambda x: (x['interview_id'], x['section_id'], x['content_id']), axis=1)
+
+#%%
+def get_sep(row):
+    prev_interview_id, prev_section_id, prev_content_id = row['prev_info']
+    interview_id, section_id, content_id = row['interview_id'], row['section_id'], row['content_id']
+
+    if interview_id != prev_interview_id:
+        return '<new_doc>'
+    elif section_id != prev_section_id:
+        return '\n'
+    else:
+        return ' '
+transcripts['sep_tkn'] = transcripts[['interview_id', 'section_id', 'content_id', 'prev_info']].progress_apply(get_sep, axis=1)
+
+#%%
+for i, row in tqdm(transcripts.iterrows(), total=len(transcripts)):
+    txt = ''
+    if len(txt) > 0 and row['sep_tkn'] == '<new_doc>':
+        with open(r'C:\Data\shoa_dataset\Martha_transcripts\full_interviews' + os.sep + str(row['interview_id']) + '.txt', 'w', encoding='utf-8') as f:
+            f.write(txt)
+        txt = ''
+    else:
+        txt += row['sep_tkn']
+
+    txt += row['content']
+
+#%%
+for i, row in tqdm(full_interviews.reset_index().iterrows(), total=len(full_interviews)):
+    if
+    with open(r'C:\Data\shoa_dataset\Martha_transcripts\full_interviews' + os.sep + str(t['interview_id']) + '.txt', 'w', encoding='utf-8') as f:
+        f.write(t['content'])
