@@ -11,7 +11,7 @@ tqdm.pandas()
 
 #%%
 docs_dir = r"C:\Data\shoa_dataset\Segmented_w_topics_gold_docs\spacy_docs"
-save_dir = r"C:\Data\shoa_dataset\Segmented_w_topics_gold_docs\joined_segments_for_tagging"
+save_dir = r"C:\Data\shoa_dataset\Segmented_w_topics_gold_docs\topic_to_text"
 
 #%%
 """
@@ -164,3 +164,10 @@ reduced_segments.sample(frac=1).to_excel(save_dir + os.sep + 'segments.xlsx')
 # for doc in documents:
 #     with open(save_dir + os.sep + str(doc[0]) + '.txt', 'w', encoding='utf-8') as f:
 #         f.write('\n'.join(doc[1]['seg_txt']))
+
+
+#%%
+segments = segments[segments['topic'] != 'NO_TOPIC']
+segments['content_len'] = segments['content'].apply(len)
+segments = segments.sort_values(by=['topic', 'content_len'], ascending=[True, False])
+
